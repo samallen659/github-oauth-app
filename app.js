@@ -2,13 +2,13 @@
  * Package Imports
  */
 
-const session = require('express-session');
 const path = require('path');
 require('dotenv').config();
 const express = require('express');
 const partials = require('express-partials');
 const passport = require('passport');
-const GithubStrategy = require('passport-github2');
+const session = require('express-session');
+const GithubStrategy = require('passport-github2').Strategy;
 
 const app = express();
 
@@ -32,7 +32,7 @@ passport.use(
 			callbackURL: 'http://localhost:3000/auth/github/callback',
 		},
 		(accessToken, refreshToken, profile, done) => {
-			return done(null, profile);
+			done(null, profile);
 		}
 	)
 );
@@ -54,7 +54,6 @@ app.set('view engine', 'ejs');
 app.use(partials());
 app.use(express.json());
 app.use(express.static(__dirname + '/public'));
-app.use(passport.initialize());
 app.use(
 	session({
 		secret: 'codecademy',
@@ -62,6 +61,7 @@ app.use(
 		saveUninitialized: false,
 	})
 );
+app.use(passport.initialize());
 app.use(passport.session());
 
 /*
@@ -72,7 +72,7 @@ app.get('/', (req, res) => {
 	res.render('index', { user: req.user });
 });
 
-app.get('/account', (req, res) => {
+app.get('/account', ensureAuthenticated, (req, res) => {
 	res.render('account', { user: req.user });
 });
 
@@ -87,9 +87,7 @@ app.get('/logout', (req, res) => {
 
 app.get('/auth/github', passport.authenticate('github', { scope: ['user'] }));
 
-app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
-	res.redirect('/');
-});
+app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login', successRedirect: '/' }));
 
 /*
  * Listener
@@ -100,3 +98,12 @@ app.listen(PORT, () => console.log(`Listening on ${PORT}`));
 /*
  * ensureAuthenticated Callback Function
  */
+
+function ensureAuthenticated(req, res, next) {
+	console.log(req.isAuthenticated());
+	if (req.isAuthenticated()) {
+		return next();
+	} else {
+		res.redirect('/login');
+	}
+}
