@@ -41,9 +41,9 @@ passport.serializeUser((user, done) => {
 	done(null, user);
 });
 
-passport.deserializeUser((user,done) => {
+passport.deserializeUser((user, done) => {
 	done(null, user);
-})
+});
 
 /*
  *  Express Project Setup
@@ -84,6 +84,8 @@ app.get('/logout', (req, res) => {
 	req.logout();
 	res.redirect('/');
 });
+
+app.get('/auth/github', passport.authenticate('github', { scope: ['user'] }));
 
 /*
  * Listener
