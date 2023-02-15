@@ -37,6 +37,14 @@ passport.use(
 	)
 );
 
+passport.serializeUser((user, done) => {
+	done(null, user);
+});
+
+passport.deserializeUser((user,done) => {
+	done(null, user);
+})
+
 /*
  *  Express Project Setup
  */
@@ -46,6 +54,7 @@ app.set('view engine', 'ejs');
 app.use(partials());
 app.use(express.json());
 app.use(express.static(__dirname + '/public'));
+app.use(passport.initialize());
 app.use(
 	session({
 		secret: 'codecademy',
@@ -53,6 +62,7 @@ app.use(
 		saveUninitialized: false,
 	})
 );
+app.use(passport.session());
 
 /*
  * Routes
