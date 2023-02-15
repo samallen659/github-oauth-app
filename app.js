@@ -32,7 +32,7 @@ passport.use(
 			callbackURL: 'http://localhost:3000/auth/github/callback',
 		},
 		(accessToken, refreshToken, profile, done) => {
-			return null, profile;
+			return done(null, profile);
 		}
 	)
 );
@@ -86,6 +86,10 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/auth/github', passport.authenticate('github', { scope: ['user'] }));
+
+app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
+	res.redirect('/');
+});
 
 /*
  * Listener
